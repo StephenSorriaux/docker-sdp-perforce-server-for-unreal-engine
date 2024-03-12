@@ -3,8 +3,9 @@
 
 # For which ubuntu version perforce supported, see:
 # https://www.perforce.com/manuals/p4sag/Content/P4SAG/install.linux.packages.html
-ARG OS_DISTRO=jammy
-FROM ubuntu:${OS_DISTRO} as base
+ARG UBUNTU_VERSION=jammy
+
+FROM ubuntu:${UBUNTU_VERSION} as base
 
 ##  Install system prerequisites used by SDP.
 # 1. cron: for running SDP cron jobs
@@ -23,14 +24,14 @@ RUN apt-get update && apt-get install -y \
 ### Download SDP stage
 FROM base as stage1
 
-COPY files_for_build/1/* /tmp
+COPY files_for_build/1/* /tmp/
 
 # Specify the SDP version, if SDP_VERSION is empty, the latest SDP will be downloaded.
-ARG SDP_VERSION=.2023.1.29621
+ARG SDP_VERSION=2023.2.30041
 
 # Download SDP
 RUN /bin/bash -x /tmp/setup_container.sh\
-&& export SDPVersion=$SDP_VERSION \
+&& export SDPVersion=.${SDP_VERSION} \
 && /bin/bash -x /tmp/download_sdp.sh \
 && rm -rf /tmp/*
 
@@ -38,7 +39,7 @@ RUN /bin/bash -x /tmp/setup_container.sh\
 FROM stage1 as stage2
 
 # P4 binaries version
-ARG P4_VERSION=r23.1
+ARG P4_VERSION=r23.2
 
 # For minal usage, only p4 and p4d need to be downloaded.
 ARG P4_BIN_LIST=p4,p4d
@@ -52,6 +53,18 @@ RUN export P4Version=${P4_VERSION}\
 
 ### Final stage
 FROM stage2 as stage3
+
+ARG VCS_REF=unspecified
+ARG BUILD_DATE=unspecified
+
+LABEL org.label-schema.name="sdp-perforce" \
+      org.label-schema.description="SDP Perforce for Unreal Engine" \
+      org.label-schema.build-date="${BUILD_DATE}" \
+      org.label-schema.vcs-url="https://github.com/StephenSorriaux/docker-sdp-perforce-server-for-unreal-engine" \
+      org.label-schema.vcs-ref="${VCS_REF}" \
+      org.label-schema.version="sdp.${SDP_VERSION}-helix.${P4_VERSION}" \
+      org.label-schema.schema-version="1.0" \
+      maintainer="ssorriaux"
 
 # Port for perforce server
 EXPOSE 1666
