@@ -43,29 +43,13 @@ jobs:
         echo DOCKER_IMAGE_VERSION=sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.debian_version }} >> $GITHUB_ENV
         echo DOCKER_IMAGE_TAG=${{ env.IMAGE_DEST }}:sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.debian_version }} >> $GITHUB_OUTPUT
 
-    - name: Build image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        platforms: linux/amd64
-        push: false
-        load: true
-        tags: ${{ steps.setup.outputs.DOCKER_IMAGE_TAG }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        build-args: |
-          UBUNTU_VERSION=${{ matrix.ubuntu_version }}
-          SDP_VERSION=${{ matrix.sdp_version }}
-          P4_VERSION=${{ matrix.helix_version }}
-          VCS_REF=${{ github.sha }}
-          BUILD_DATE=${{ steps.setup.outputs.BUILD_DATE }}
-
-    - name: Push image
+    - name: Build and push image
       uses: docker/build-push-action@v5
       with:
         context: .
         platforms: linux/amd64
         push: true
+        load: true
         tags: ${{ steps.setup.outputs.DOCKER_IMAGE_TAG }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
