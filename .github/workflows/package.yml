@@ -49,7 +49,6 @@ jobs:
         context: .
         platforms: linux/amd64
         push: true
-        load: true
         tags: ${{ steps.setup.outputs.DOCKER_IMAGE_TAG }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
