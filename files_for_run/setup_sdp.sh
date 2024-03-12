@@ -155,13 +155,19 @@ if [ ! -e ${P4DInstanceScript} ]; then
    # Setting password
    ${P4BIN} passwd -P ${P4_PASSWD} ${ADMINUSER}
    export P4PASSWD=${P4_PASSWD}
-   
+
+   # Perform live checkpoints
+   run "sudo -u perforce /p4/common/bin/live_checkpoint.sh ${SDP_INSTANCE}"
+
    # Setting security level to 3 (high)
    # This will cause existing passwords reset.
    run "${P4BIN} configure set security=3"
-   
+
    # 4. Finish
    /p4/${SDP_INSTANCE}/bin/p4d_${SDP_INSTANCE}_init stop
+
+   # 5. Fixup .p4tickets
+   chown perforce:perforce /p4/${SDP_INSTANCE}/.p4tickets
 else
    msg "Skip exiting instance configuring:"
    run "cat ${P4DInstanceScript}"
