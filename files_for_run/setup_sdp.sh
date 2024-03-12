@@ -81,9 +81,10 @@ if [ ! -e ${P4DInstanceScript} ]; then
    cp -p ${MkdirsCfgPath} mkdirs.${SDP_INSTANCE}.cfg
 
    # change the password in mkdirs.cfg
-   sed -e "s:=adminpass:=${P4_PASSWD}:g" \
-      -e "s:=servicepass:=${P4_PASSWD}:g" \
-      -e "s:=DNS_name_of_master_server_for_this_instance:=${P4_MASTER_HOST}:g" \
+   sed -e "s/=adminpass/=${P4_PASSWD}/g" \
+      -e "s/=servicepass/=${P4_PASSWD}/g" \
+      -e "s/=DNS_name_of_master_server_for_this_instance/=${P4_MASTER_HOST}/g" \
+      -e "s/=\"example.com\"/=${P4_DOMAIN}/g" \
       ${MkdirsCfgPath} > mkdirs.${SDP_INSTANCE}.cfg
 
    chmod +x mkdirs.sh
