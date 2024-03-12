@@ -1,0 +1,77 @@
+---
+name: Docker packaging
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  IMAGE_DEST: "ssorriaux/sdp-perforce-ue"
+
+jobs:
+  build-and-push:
+    name: Docker - build and push
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+        - sdp_version: "2023.2.30041"
+          helix_version: "r23.2"
+          ubuntu_version: "jammy"
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Set some vars
+      id: setup
+      run: |
+        echo BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") >> $GITHUB_OUTPUT
+        echo DOCKER_IMAGE_VERSION=sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.debian_version }} >> $GITHUB_ENV
+        echo DOCKER_IMAGE_TAG=${{ env.IMAGE_DEST }}:sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.debian_version }} >> $GITHUB_OUTPUT
+
+    - name: Build image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: false
+        load: true
+        tags: ${{ steps.setup.outputs.DOCKER_IMAGE_TAG }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          UBUNTU_VERSION=${{ matrix.ubuntu_version }}
+          SDP_VERSION=${{ matrix.sdp_version }}
+          P4_VERSION=${{ matrix.helix_version }}
+          VCS_REF=${{ github.sha }}
+          BUILD_DATE=${{ steps.setup.outputs.BUILD_DATE }}
+
+    - name: Push image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: true
+        tags: ${{ steps.setup.outputs.DOCKER_IMAGE_TAG }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          UBUNTU_VERSION=${{ matrix.ubuntu_version }}
+          SDP_VERSION=${{ matrix.sdp_version }}
+          P4_VERSION=${{ matrix.helix_version }}
+          VCS_REF=${{ github.sha }}
+          BUILD_DATE=${{ steps.setup.outputs.BUILD_DATE }}
