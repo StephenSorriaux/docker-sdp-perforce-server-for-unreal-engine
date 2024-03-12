@@ -40,8 +40,8 @@ jobs:
       id: setup
       run: |
         echo BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") >> $GITHUB_OUTPUT
-        echo DOCKER_IMAGE_VERSION=sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.debian_version }} >> $GITHUB_ENV
-        echo DOCKER_IMAGE_TAG=${{ env.IMAGE_DEST }}:sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.debian_version }} >> $GITHUB_OUTPUT
+        echo DOCKER_IMAGE_VERSION=sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.ubuntu_version }} >> $GITHUB_ENV
+        echo DOCKER_IMAGE_TAG=${{ env.IMAGE_DEST }}:sdp.${{ matrix.sdp_version }}-helix.${{ matrix.helix_version }}-${{ matrix.ubuntu_version }} >> $GITHUB_OUTPUT
 
     - name: Build and push image
       uses: docker/build-push-action@v5

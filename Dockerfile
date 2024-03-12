@@ -62,7 +62,7 @@ LABEL org.label-schema.name="sdp-perforce" \
       org.label-schema.build-date="${BUILD_DATE}" \
       org.label-schema.vcs-url="https://github.com/StephenSorriaux/docker-sdp-perforce-server-for-unreal-engine" \
       org.label-schema.vcs-ref="${VCS_REF}" \
-      org.label-schema.version="sdp.${SDP_VERSION}-helix.${P4_VERSION}" \
+      org.label-schema.version="sdp.${SDP_VERSION}-helix.${P4_VERSION}-${UBUNTU_VERSION}" \
       org.label-schema.schema-version="1.0" \
       maintainer="ssorriaux"
 
