@@ -85,6 +85,7 @@ if [ ! -e ${P4DInstanceScript} ]; then
       -e "s/=servicepass/=${P4_PASSWD}/g" \
       -e "s/=DNS_name_of_master_server_for_this_instance/=${P4_MASTER_HOST}/g" \
       -e "s/=\"example.com\"/=${P4_DOMAIN}/g" \
+      -e "s/^SSL_PREFIX=/SSL_PREFIX=${P4_SSL_PREFIX}/g" \
       ${MkdirsCfgPath} > mkdirs.${SDP_INSTANCE}.cfg
 
    chmod +x mkdirs.sh
@@ -156,7 +157,7 @@ if [ ! -e ${P4DInstanceScript} ]; then
    ${P4BIN} passwd -P ${P4_PASSWD} ${ADMINUSER}
    export P4PASSWD=${P4_PASSWD}
 
-   # Perform live checkpoints
+   # Perform 1st live checkpoints
    run "sudo -u perforce /p4/common/bin/live_checkpoint.sh ${SDP_INSTANCE}"
 
    # Setting security level to 3 (high)
