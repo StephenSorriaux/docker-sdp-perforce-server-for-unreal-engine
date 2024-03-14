@@ -112,7 +112,15 @@ if [ ! -e ${P4DInstanceScript} ]; then
 
    # We must start the service before run configure_new_server.sh
    /p4/${SDP_INSTANCE}/bin/p4d_${SDP_INSTANCE}_init start
-
+   if [ $P4_SSL_PREFIX == "ssl:" ]; then
+      # Note: Automating a 'p4 trust -y' (especially with '-f') may not be appropriate
+      # in a production environment, as it defeats the purpose of the Open SSL trust
+      # mechanism.  But for our purposes here, where scripts spin up throw-away data
+      # sets for testing or training purposes, it's just dandy.
+      run "/p4/${SDP_INSTANCE}/bin/p4_${SDP_INSTANCE} -p $P4PORT trust -y -f" \
+         "Trusting the OpenSSL Cert of the server." ||\
+         bail "Failed to trust the server."
+   fi
    run "${P4BIN} -s info -s" "Verifying direct connection to Perforce server." ||\
       bail "Could not connect to Perforce server."
 
@@ -157,6 +165,10 @@ if [ ! -e ${P4DInstanceScript} ]; then
    ${P4BIN} passwd -P ${P4_PASSWD} ${ADMINUSER}
    export P4PASSWD=${P4_PASSWD}
 
+   #  Fixup .p4tickets, .p4trust
+   chown perforce:perforce /p4/${SDP_INSTANCE}/.p4tickets
+   chown perforce:perforce /p4/${SDP_INSTANCE}/.p4trust
+
    # Perform 1st live checkpoints
    run "sudo -u perforce /p4/common/bin/live_checkpoint.sh ${SDP_INSTANCE}"
 
@@ -167,8 +179,6 @@ if [ ! -e ${P4DInstanceScript} ]; then
    # 4. Finish
    /p4/${SDP_INSTANCE}/bin/p4d_${SDP_INSTANCE}_init stop
 
-   # 5. Fixup .p4tickets
-   chown perforce:perforce /p4/${SDP_INSTANCE}/.p4tickets
 else
    msg "Skip exiting instance configuring:"
    run "cat ${P4DInstanceScript}"
